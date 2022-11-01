@@ -110,7 +110,7 @@ main(int argc, char *argv[])
 					cbamin.day=newnode->m.time.day;
 					cbamin.month=newnode->m.time.month;
 				}
-// nuevo
+				// nuevo
 				if (ctr_cba==0)
 				{
 					newnode_2=(struct city_prom*)malloc(sizeof(struct city_prom));
@@ -153,7 +153,7 @@ main(int argc, char *argv[])
 						}
 					}
 				}
-//
+				//
 				ctr_cba++;//contador de muestas 
 				sum_cba+=newnode->m.temp;//sumador de temperaturas para cada provincia
 			}
@@ -303,14 +303,13 @@ main(int argc, char *argv[])
 				sum_mndza+=newnode->m.temp;
 			}
 		}//if()//aca hay que poner una condicion para ver el valor mas aproximado a 23 que es la temperatura para cosechar pimientos
-		
 	}
 	prom_cba=sum_cba/ctr_cba;
 	prom_stafe=sum_stafe/ctr_stafe;
 	prom_mndza=sum_mndza/ctr_mndza;
 	do{
 		cout<<"\n***Menú de opciones***\n"<<endl;
-		cout<<"\nIngrese:\n1:Total de las muestras de cada provincia\n2:Temperatura promedio de cada provincia\n3:Temperatura promedio de cada ciudad");
+		cout<<"\nIngrese:\n1:Total de las muestras de cada provincia\n2:Temperatura promedio de cada provincia\n3:Temperatura promedio de cada ciudad";
 		cout<<"\n4:Ciudad mas calida de cada provincia\n5:Ciudad mas fria de cada provincia\n6:Dia mas frio de cada provincia\n7:Dia mas calido de cada ciudad\n8:Mejor provincia para el cultivo de pimientos\n";
 		cin>>opt; 
 		switch (opt)
