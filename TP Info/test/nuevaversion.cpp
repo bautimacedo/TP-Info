@@ -45,8 +45,20 @@ public:
 	};
 	void pimientos (){
 		dif_cba=23-prom_cba; 
+		if (dif_cba<0)
+		{
+			(dif_cba=dif_cba*-1);
+		}
 		dif_stafe=23-prom_stafe; 
+		if (dif_stafe<0)
+		{
+			(dif_stafe=dif_stafe*-1);
+		}
 		dif_mndza=23-prom_mndza; 
+		if (dif_mndza<0)
+		{
+			(dif_mndza=dif_mndza*-1);
+		}
 		if((dif_cba<dif_stafe)&&(dif_cba<dif_mndza))
 		{
 			cout<<"\nLa mejor provincia para cultivar pimientos es Cordoba con "<<prom_cba<<" grados"<<endl; 
@@ -105,7 +117,8 @@ void push (struct node**,struct city,float*);
 void print (struct node*,struct node*,struct node*);
 void temp_prom (struct city_prom**,struct node*);
 void printprom(struct city_prom*,struct city_prom*,struct city_prom*);
-void calido_frio(struct city_prom *, int);
+void calido(struct city_prom *);
+void frio(struct city_prom *);
 
 
 int main(int argc, char *argv[]) 
@@ -123,7 +136,6 @@ int main(int argc, char *argv[])
 	float temp_cba=0,temp_mndza=0,temp_stafe=0;
 	int opt;
 	char cont;
-	int option=0; 
 	FILE *fp; 
 	fp=fopen("./data_set.txt", "rb");
 	if(fp==NULL)
@@ -196,24 +208,22 @@ int main(int argc, char *argv[])
 			printprom(head_ctyprm_cba,head_ctyprm_mndza,head_ctyprm_stafe);
 			break; 
 		case 4://ciudad más calida de cada provincia
-			option=0;
 			cout<<"\nCiudades con temperaturas más calidas"<<endl; 
 			cout<<"\nCiudad más calida de Cordoba"<<endl;
-			calido_frio(head_ctyprm_cba,option);
+			calido(head_ctyprm_cba);
 			cout<<"\nCiudad más calida de Mendoza"<<endl;
-			calido_frio(head_ctyprm_mndza,option);
+			calido(head_ctyprm_mndza);
 			cout<<"\nCiudad más calida de Santa fe"<<endl;
-			calido_frio(head_ctyprm_stafe,option);
+			calido(head_ctyprm_stafe);
 			break; 
 		case 5://ciudad mas fria de cada provincia
-			option=1;
-			cout<<"\nCiudades con temperaturas más frias"<<endl; 
+			cout<<"\nCiudades con temperaturas más frias"<<endl;
 			cout<<"\nCiudad más fria de Cordoba"<<endl;
-			calido_frio(head_ctyprm_cba,option);
+			frio(head_ctyprm_cba);
 			cout<<"\nCiudad más fria de Mendoza"<<endl;
-			calido_frio(head_ctyprm_mndza,option);
+			frio(head_ctyprm_mndza);
 			cout<<"\nCiudad más fria de Santa fe"<<endl;
-			calido_frio(head_ctyprm_stafe,option);
+			frio(head_ctyprm_stafe);
 			break; 
 		case 6://dia más frio de cada provincia
 			break; 
@@ -370,61 +380,65 @@ void printprom(struct city_prom *head_ctyprm_cba, struct city_prom *head_ctyprm_
 		temp=temp->next;
 	}
 }
-void calido_frio(struct city_prom *head, int option)
+void calido(struct city_prom *head)
 {
 	struct calidofrio q;
 	struct city_prom *temp=NULL; 
 	int ctr=0;
 	temp=head; 
-	if (option == 1)//para más frio; 
+
+	while(temp!=NULL)
 	{
-		while(temp!=NULL)
+		if (ctr==0)
 		{
-			if (ctr==0)
+			ctr++;
+			q.id=temp->id;
+			strcpy(q.name,temp->name);
+			q.temperature=temp->temperature/temp->ctr; 
+			temp=temp->next;
+			
+		}else{
+			if((temp->temperature)>(q.temperature))
 			{
 				q.id=temp->id; 
 				strcpy(q.name,temp->name);
 				q.temperature=temp->temperature/temp->ctr; 
 				temp=temp->next;
-				ctr++;
-			}else{
-				if((temp->temperature)<(q.temperature))
-				{
-					q.id=temp->id; 
-					strcpy(q.name,temp->name);
-					q.temperature=temp->temperature/temp->ctr; 
-					temp=temp->next;
-				}
 			}
 		}
-		cout<<"Id ciudad "<<q.id<<endl; 
-		cout<<"Nombre ciudad "<<q.name<<endl; 
-		cout<<"Temperatura ciudad "<<q.temperature<<endl; 
 	}
-	if (option == 0)//para más calido; 
-	{
-		while(temp!=NULL)
-		{
-			if (ctr==0)
-			{
-				q.id=temp->id; 
-				strcpy(q.name,temp->name);
-				q.temperature=temp->temperature/temp->ctr; 
-				temp=temp->next;
-				ctr++;
-			}else{
-				if((temp->temperature)>(q.temperature))//temperatura mas alta
-				{
-					q.id=temp->id; 
-					strcpy(q.name,temp->name);
-					q.temperature=temp->temperature/temp->ctr; 
-					temp=temp->next;
-				}
-			}
-		}
-		cout<<"Id ciudad, "<<q.id<<endl; 
-		cout<<"Nombre ciudad "<<q.name<<endl; 
-		cout<<"Temperatura ciudad "<<q.temperature<<endl; 
-	}
+	cout<<"Id ciudad "<<q.id<<endl; 
+	cout<<"Nombre ciudad "<<q.name<<endl; 
+	cout<<"Temperatura ciudad "<<q.temperature<<endl; 
+}
+void frio(struct city_prom *head)
+{
+	struct calidofrio q;
+	struct city_prom *temp=NULL; 
+	int ctr=0;
+	temp=head; 
 	
+	while(temp!=NULL)
+	{
+		if (ctr==0)
+		{
+			ctr++;
+			q.id=temp->id;
+			strcpy(q.name,temp->name);
+			q.temperature=temp->temperature/temp->ctr; 
+			temp=temp->next;
+			
+		}else{
+			if((temp->temperature)<(q.temperature))
+			{
+				q.id=temp->id; 
+				strcpy(q.name,temp->name);
+				q.temperature=temp->temperature/temp->ctr; 
+				temp=temp->next;
+			}
+		}
+	}
+	cout<<"Id ciudad "<<q.id<<endl; 
+	cout<<"Nombre ciudad "<<q.name<<endl; 
+	cout<<"Temperatura ciudad "<<q.temperature<<endl; 
 }
