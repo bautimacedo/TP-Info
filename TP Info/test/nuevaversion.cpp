@@ -108,10 +108,13 @@ struct city_prom
 	int ctr;
 	struct city_prom *next;
 };
-struct calidofrio{
-	int id;
+struct cal{
+	int Id;
 	char name[50];
-	float temperature; 
+	float temperature;
+	int day; 
+	int month;
+	struct cal *next;
 };
 void push (struct node**,struct city,float*);
 void print (struct node*,struct node*,struct node*);
@@ -119,11 +122,14 @@ void temp_prom (struct city_prom**,struct node*);
 void printprom(struct city_prom*,struct city_prom*,struct city_prom*);
 void calido(struct city_prom *);
 void frio(struct city_prom *);
-
+void d_frio(struct node*);
+void d_cal(struct node*, struct cal**);
+void printd_cal(struct cal*);
 
 int main(int argc, char *argv[]) 
 {
 	struct city c;
+	
 	struct node *head_cba=NULL;//Lista enlazada para cordoba
 	struct node *head_stafe=NULL;//Lista enlazada para santa fe
 	struct node *head_mndza=NULL;//Lista enlazada para mendoza
@@ -132,12 +138,18 @@ int main(int argc, char *argv[])
 	struct city_prom *head_ctyprm_stafe=NULL; 
 	struct city_prom *head_ctyprm_mndza=NULL; 
 	
+	struct cal *head_cal_cba=NULL;
+	struct cal *head_cal_stafe=NULL;
+	struct cal *head_cal_mndza=NULL;
+	
 	int ctr_cba=0,ctr_mndza=0,ctr_stafe=0;
 	float temp_cba=0,temp_mndza=0,temp_stafe=0;
 	int opt;
 	char cont;
+
 	FILE *fp; 
 	fp=fopen("./data_set.txt", "rb");
+	
 	if(fp==NULL)
 	{
 		printf("Imposible abrir el archivo");
@@ -192,10 +204,10 @@ int main(int argc, char *argv[])
 		cin>>opt; 
 		switch (opt)
 		{
-		case 1:
+		case 1://contadores de cada provincia
 			printf("\n\n\n\nContador Cba: %d - Contador Stafe: %d - Contador Mndza: %d", ctr_cba,ctr_stafe,ctr_mndza);
 			break; 
-		case 2:
+		case 2://promedios de provincias
 			cout<<"\nPromedio Cordoba "; 
 			cout<<p.getprom_cba()<<endl;
 			cout<<"\nPromedio Santa Fe "; 
@@ -203,7 +215,7 @@ int main(int argc, char *argv[])
 			cout<<"\nPromedio Santa Mendoza "; 
 			cout<<p.getprom_mndza()<<endl;
 			break; 
-		case 3:
+		case 3://promedios de cada ciudad
 			printf("\n***TEMPERATURAS PROMEDIO***\n");
 			printprom(head_ctyprm_cba,head_ctyprm_mndza,head_ctyprm_stafe);
 			break; 
@@ -211,23 +223,39 @@ int main(int argc, char *argv[])
 			cout<<"\nCiudades con temperaturas más calidas"<<endl; 
 			cout<<"\nCiudad más calida de Cordoba"<<endl;
 			calido(head_ctyprm_cba);
-			cout<<"\nCiudad más calida de Mendoza"<<endl;
-			calido(head_ctyprm_mndza);
 			cout<<"\nCiudad más calida de Santa fe"<<endl;
 			calido(head_ctyprm_stafe);
+			cout<<"\nCiudad más calida de Mendoza"<<endl;
+			calido(head_ctyprm_mndza);
 			break; 
 		case 5://ciudad mas fria de cada provincia
-			cout<<"\nCiudades con temperaturas más frias"<<endl;
+			cout<<"\nCiudades con temperaturas más frias"<<endl; 
 			cout<<"\nCiudad más fria de Cordoba"<<endl;
 			frio(head_ctyprm_cba);
-			cout<<"\nCiudad más fria de Mendoza"<<endl;
-			frio(head_ctyprm_mndza);
 			cout<<"\nCiudad más fria de Santa fe"<<endl;
 			frio(head_ctyprm_stafe);
+			cout<<"\nCiudad más fria de Mendoza"<<endl;
+			frio(head_ctyprm_mndza);
 			break; 
 		case 6://dia más frio de cada provincia
+			cout<<"\nDias más frios de cada provincia"<<endl; 
+			cout<<"Día más frio de córdoba"<<endl; 
+			d_frio(head_cba);
+			cout<<"Día más frio de santa fe"<<endl; 
+			d_frio(head_stafe);
+			cout<<"Día más frio de mendoza"<<endl; 
+			d_frio(head_mndza);
 			break; 
 		case 7://dia más calido de cada ciudad
+			d_cal(head_cba,&head_cal_cba);
+			cout<<"\nDias más calidos de las ciudades de cordoba"<<endl; 
+			printd_cal(head_cal_cba);
+			d_cal(head_stafe,&head_cal_stafe);
+			cout<<"\nDias más calidos de las ciudades de Santa Fe"<<endl;
+			printd_cal(head_cal_stafe);
+			d_cal(head_mndza,&head_cal_mndza);
+			cout<<"\nDias más calidos de las ciudades de Mendoza"<<endl; 
+			printd_cal(head_cal_mndza);
 			break; 
 		case 8://Mejor provincia para el cultivo de pimientos
 			p.pimientos();
@@ -240,7 +268,7 @@ int main(int argc, char *argv[])
 		cin>>cont;
 	}while((cont=='s')||(cont=='S'));
 	
-	cout<<"\ndesea imprimir??[s/n]"<<endl;
+	cout<<"\nDesea imprimir todos los datos??[s/n]"<<endl;
 	cin>>cont; 
 	if ((cont=='s')||(cont=='S'))
 	{
@@ -248,7 +276,7 @@ int main(int argc, char *argv[])
 	}
 	return 0;
 }
-void push (struct node** head, struct city c, float *temperature)
+void push (struct node** head, struct city c, float *temperature)//push de lista para cada provincia
 {
 	struct node* temp=NULL; 
 	struct node* newnode=NULL; 
@@ -274,7 +302,7 @@ void push (struct node** head, struct city c, float *temperature)
 		}
 	}
 }
-void print (struct node *head_cba,struct node *head_stafe,struct node *head_mndza)
+void print (struct node *head_cba,struct node *head_stafe,struct node *head_mndza)//impresion total de datos
 {
 	struct node* temp=NULL;
 	temp=head_cba;
@@ -297,13 +325,14 @@ void print (struct node *head_cba,struct node *head_stafe,struct node *head_mndz
 		temp=temp->next;
 	}
 }
-void temp_prom(struct city_prom **head, struct node *node)
+void temp_prom(struct city_prom **head, struct node *node)//push de listas de promedios de cada ciudad
 {
 	struct city_prom *newnode=NULL; 
 	struct city_prom *temp=NULL;
 	struct node *temp_node=NULL;
-	int ret;
+	int ret=0;
 	int counter=0;
+	
 	temp_node=node;
 	while (temp_node!=NULL)
 	{
@@ -316,12 +345,11 @@ void temp_prom(struct city_prom **head, struct node *node)
 				exit(1);
 			}else{
 			newnode->next=NULL; 
+			newnode->ctr=1;
 			strcpy(newnode->name,temp_node->c.city_name);
 			newnode->id=temp_node->c.cityId;
-			newnode->temperature+=temp_node->c.m.temp;
-			newnode->ctr++;
+			newnode->temperature=temp_node->c.m.temp;
 			*head=newnode;
-			temp_node=temp_node->next;
 			counter++;
 			}
 		}else{
@@ -330,7 +358,6 @@ void temp_prom(struct city_prom **head, struct node *node)
 			{
 				newnode->temperature+=temp_node->c.m.temp;
 				newnode->ctr++;
-				temp_node=temp_node->next;
 			}else{
 				newnode=(struct city_prom*)malloc(sizeof(struct city_prom));
 				if (newnode==NULL)
@@ -349,96 +376,211 @@ void temp_prom(struct city_prom **head, struct node *node)
 						temp=temp->next;
 					}
 					temp->next=newnode;
-					temp_node=temp_node->next;
 				}
 			}
 		}
+		temp_node=temp_node->next;
 	}	
 }
-void printprom(struct city_prom *head_ctyprm_cba, struct city_prom *head_ctyprm_mndza, struct city_prom *head_ctyprm_stafe)
+void printprom(struct city_prom *head_ctyprm_cba, struct city_prom *head_ctyprm_mndza, struct city_prom *head_ctyprm_stafe)//impresion lista promedios de cada ciudad
 {
 	struct city_prom *temp=NULL;
-	printf("\n***Ciudades de cordoba***\n\nCityId \t CityName \t Temperature");
+	printf("\n***Ciudades de cordoba***\n\nCityId \t CityName \t\t Temperature\n");
 	temp=head_ctyprm_cba;
 	while(temp!=NULL)
 	{
-		printf(" \n%d \t %s \t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
+		printf("\t%d \t %s \t\t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
 		temp=temp->next;
 	}
-	printf("\n***Ciudades de santa fe***\n\nCityId \t CityName \t Temperature");
+	printf("\n***Ciudades de santa fe***\n\nCityId \t CityName \t\t Temperature\n");
 	temp=head_ctyprm_stafe;
 	while(temp!=NULL)
 	{
-		printf(" \n%d \t %s \t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
+		printf("\t%d \t %s \t\t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
 		temp=temp->next;
 	}
-	printf("\n***Ciudades de mendoza***\n\nCityId \t CityName \t Temperature");
+	printf("\n***Ciudades de mendoza***\n\nCityId \t CityName \t\t Temperature\n");
 	temp=head_ctyprm_mndza;
 	while(temp!=NULL)
 	{
-		printf(" \n%d \t %s \t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
+		printf("\t%d \t %s \t\t %f \n", temp->id, temp->name, (temp->temperature)/temp->ctr);
 		temp=temp->next;
 	}
 }
-void calido(struct city_prom *head)
+void calido(struct city_prom *head)//ciudad mas calida de cada provincia
 {
-	struct calidofrio q;
 	struct city_prom *temp=NULL; 
+	int id;
+	char name[50];
+	float temperature; 
 	int ctr=0;
 	temp=head; 
-
 	while(temp!=NULL)
 	{
-		if (ctr==0)
+		if(ctr==0)
 		{
-			ctr++;
-			q.id=temp->id;
-			strcpy(q.name,temp->name);
-			q.temperature=temp->temperature/temp->ctr; 
-			temp=temp->next;
-			
-		}else{
-			if((temp->temperature)>(q.temperature))
-			{
-				q.id=temp->id; 
-				strcpy(q.name,temp->name);
-				q.temperature=temp->temperature/temp->ctr; 
-				temp=temp->next;
-			}
+			id=temp->id;
+			strcpy(name,temp->name);
+			temperature=temp->temperature/temp->ctr;
+			ctr=1;
 		}
+		if((ctr!=0)&&((temp->temperature/temp->ctr)>temperature))
+		{	
+			id=temp->id;
+			strcpy(name,temp->name);
+			temperature=temp->temperature/temp->ctr;
+		}	
+		temp=temp->next;
 	}
-	cout<<"Id ciudad "<<q.id<<endl; 
-	cout<<"Nombre ciudad "<<q.name<<endl; 
-	cout<<"Temperatura ciudad "<<q.temperature<<endl; 
-}
-void frio(struct city_prom *head)
-{
-	struct calidofrio q;
-	struct city_prom *temp=NULL; 
-	int ctr=0;
-	temp=head; 
+	cout<<"ID "<<id; 
+	cout<<"\tNOMBRE "<<name; 
+	cout<<"\tTEMPERATURA "<<temperature<<endl; 
 	
+}
+void frio (struct city_prom *head)//ciudad más fria de cada provincia
+{
+	struct city_prom *temp=NULL; 
+	int id;
+	char name[50];
+	float temperature; 
+	int ctr=0;
+	temp=head; 
 	while(temp!=NULL)
 	{
-		if (ctr==0)
+		if(ctr==0)
 		{
-			ctr++;
-			q.id=temp->id;
-			strcpy(q.name,temp->name);
-			q.temperature=temp->temperature/temp->ctr; 
-			temp=temp->next;
-			
-		}else{
-			if((temp->temperature)<(q.temperature))
+			id=temp->id;
+			strcpy(name,temp->name);
+			temperature=temp->temperature/temp->ctr;
+			ctr=1;
+		}
+		if((ctr!=0)&&((temp->temperature/temp->ctr)<temperature))
+		{	
+			id=temp->id;
+			strcpy(name,temp->name);
+			temperature=temp->temperature/temp->ctr;
+		}	
+		temp=temp->next;
+	}
+	cout<<"ID "<<id; 
+	cout<<"\tNOMBRE "<<name; 
+	cout<<"\tTEMPERATURA "<<temperature<<endl; 
+	
+}
+void d_frio (struct node* head)//dia más frio de cada provincia
+{
+	struct node *temp=NULL; 
+	int id;
+	int dia; 
+	int mes; 
+	char nombre[50];
+	float temperatura; 
+	int ctr=0;
+	temp=head; 
+	while(temp!=NULL)
+	{
+		if(ctr==0)
+		{
+			id=temp->c.cityId;
+			strcpy(nombre,temp->c.city_name);
+			temperatura=temp->c.m.temp;
+			dia=temp->c.m.time.day;
+			mes=temp->c.m.time.month;
+			ctr=1;
+		}
+		if((ctr!=0)&&((temp->c.m.temp)<temperatura))
+		{
+			id=temp->c.cityId;
+			strcpy(nombre,temp->c.city_name);
+			temperatura=temp->c.m.temp;
+			dia=temp->c.m.time.day;
+			mes=temp->c.m.time.month;
+		}
+		temp=temp->next;
+	}
+	cout<<"ID "<<id<<endl; 
+	cout<<"NOMBRE "<<nombre<<endl; 
+	cout<<"DIA "<<dia<<endl; 
+	cout<<"MES "<<mes<<endl;
+	cout<<"TEMPERATURA "<<temperatura<<endl; 
+}
+void d_cal (struct node *node,struct cal **head)//dia mas calido de cada ciudad
+{
+	struct node *temp_node=NULL;
+	struct cal *newnode=NULL;
+	struct cal *temp=NULL; 
+	int ret;
+	int ctr=0;
+	temp_node=node;
+	while(temp_node!=NULL)
+	{
+		if((ctr==0)&&(*head==NULL))
+		{
+			newnode=(struct cal*)malloc(sizeof(struct cal));
+			if(newnode==NULL)
 			{
-				q.id=temp->id; 
-				strcpy(q.name,temp->name);
-				q.temperature=temp->temperature/temp->ctr; 
-				temp=temp->next;
+				cout<<"\nNo hay memoria disponible"; 
+				exit(1);
+			}else{
+				ctr=1;
+				newnode->next=NULL;
+				newnode->Id=temp_node->c.cityId;
+				strcpy(newnode->name,temp_node->c.city_name);
+				newnode->temperature=temp_node->c.m.temp;
+				newnode->day=temp_node->c.m.time.day;
+				newnode->month=temp_node->c.m.time.month;
+				*head=newnode;
+			}
+		}else{
+			ret=strcmp(newnode->name,temp_node->c.city_name);
+			if (ret==0)
+			{
+				if((temp_node->c.m.temp)>(newnode->temperature))
+				{
+					newnode->Id=temp_node->c.cityId;
+					strcpy(newnode->name,temp_node->c.city_name);
+					newnode->temperature=temp_node->c.m.temp;
+					newnode->day=temp_node->c.m.time.day;
+					newnode->month=temp_node->c.m.time.month;
+				}
+			}else{
+				newnode=(struct cal*)malloc(sizeof(struct cal));
+				if (newnode==NULL)
+				{
+					printf("\nno hay memoria suficiente"); 
+					exit (1);
+				}else{
+					newnode->Id=temp_node->c.cityId;
+					strcpy(newnode->name,temp_node->c.city_name);
+					newnode->temperature=temp_node->c.m.temp;
+					newnode->day=temp_node->c.m.time.day;
+					newnode->month=temp_node->c.m.time.month;
+					temp=*head;
+					while(temp->next!=NULL)
+					{
+						temp=temp->next;
+					}
+					temp->next=newnode;
+				}
 			}
 		}
+		temp_node=temp_node->next;
 	}
-	cout<<"Id ciudad "<<q.id<<endl; 
-	cout<<"Nombre ciudad "<<q.name<<endl; 
-	cout<<"Temperatura ciudad "<<q.temperature<<endl; 
+	
+}
+void printd_cal(struct cal*head)// imprimir dia mas calido de cada ciudad
+{
+	struct cal *temp=NULL; 
+	temp=head;
+	cout<<"\tID\tNOMBRE\tTEMPERATURA\tDIA\tMES"<<endl; 
+	while(temp!=NULL)
+	{
+		cout<<"\t"<<temp->Id;
+		cout<<"\t"<<temp->name;
+		cout<<"\t"<<temp->temperature;
+		cout<<"\t"<<temp->day;
+		cout<<"\t"<<temp->month;
+		cout<<endl; 
+		temp=temp->next;
+	}
 }
